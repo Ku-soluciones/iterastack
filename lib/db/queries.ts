@@ -1,3 +1,4 @@
+import { isMockMode, mockUser, mockTeam } from '@/lib/mock';
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
 import { activityLogs, teamMembers, teams, users } from './schema';
@@ -5,6 +6,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
 
 export async function getUser() {
+  if (isMockMode) return mockUser;
   const sessionCookie = (await cookies()).get('session');
   if (!sessionCookie || !sessionCookie.value) {
     return null;
@@ -37,6 +39,7 @@ export async function getUser() {
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {
+  if (isMockMode) return null;
   const result = await db
     .select()
     .from(teams)
@@ -55,6 +58,7 @@ export async function updateTeamSubscription(
     subscriptionStatus: string;
   }
 ) {
+  if (isMockMode) return;
   await db
     .update(teams)
     .set({
@@ -65,6 +69,7 @@ export async function updateTeamSubscription(
 }
 
 export async function getUserWithTeam(userId: number) {
+  if (isMockMode) return { user: mockUser, teamId: mockTeam.id };
   const result = await db
     .select({
       user: users,
@@ -79,6 +84,7 @@ export async function getUserWithTeam(userId: number) {
 }
 
 export async function getActivityLogs() {
+  if (isMockMode) return [];
   const user = await getUser();
   if (!user) {
     throw new Error('User not authenticated');
@@ -100,6 +106,7 @@ export async function getActivityLogs() {
 }
 
 export async function getTeamForUser() {
+  if (isMockMode) return mockTeam;
   const user = await getUser();
   if (!user) {
     return null;

@@ -1,3 +1,4 @@
+import { isMockMode } from '@/lib/mock';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { users, teams, teamMembers } from '@/lib/db/schema';
@@ -7,6 +8,7 @@ import { stripe } from '@/lib/payments/stripe';
 import Stripe from 'stripe';
 
 export async function GET(request: NextRequest) {
+  if (isMockMode) return NextResponse.redirect(new URL('/dashboard', request.url));
   const searchParams = request.nextUrl.searchParams;
   const sessionId = searchParams.get('session_id');
 

@@ -1,3 +1,4 @@
+import { isMockMode } from '@/lib/mock';
 import Stripe from 'stripe';
 import { handleSubscriptionChange, stripe } from '@/lib/payments/stripe';
 import { NextRequest, NextResponse } from 'next/server';
@@ -5,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
+  if (isMockMode) return NextResponse.json({ received: true, mock: true });
   const payload = await request.text();
   const signature = request.headers.get('stripe-signature') as string;
 

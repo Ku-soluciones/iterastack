@@ -1,3 +1,4 @@
+import { isMockMode } from '@/lib/mock';
 import { z } from 'zod';
 import { TeamDataWithMembers, User } from '@/lib/db/schema';
 import { getTeamForUser, getUser } from '@/lib/db/queries';
@@ -49,6 +50,7 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
       return { error: result.error.errors[0].message };
     }
 
+    if (isMockMode) return { error: 'Demo mode: changes are not saved.' };
     return action(result.data, formData, user);
   };
 }

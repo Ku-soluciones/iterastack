@@ -1,5 +1,6 @@
 'use server';
 
+import { isMockMode } from '@/lib/mock';
 import { z } from 'zod';
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
@@ -50,6 +51,7 @@ const signInSchema = z.object({
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
+  if (isMockMode) redirect('/dashboard');
   const { email, password } = data;
 
   const userWithTeam = await db
@@ -107,6 +109,7 @@ const signUpSchema = z.object({
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
+  if (isMockMode) redirect('/dashboard');
   const { email, password, inviteId } = data;
 
   const existingUser = await db
@@ -222,6 +225,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 });
 
 export async function signOut() {
+  if (isMockMode) redirect('/sign-in');
   const user = (await getUser()) as User;
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);

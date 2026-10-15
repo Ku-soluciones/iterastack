@@ -1,3 +1,19 @@
+## Local mock mode
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm start
+```
+
+Open http://localhost:3000. Mock mode is enabled by default: no `.env`,
+Postgres or Stripe credentials are required. The dashboard uses a demo user
+and team; pricing and checkout are simulated. Account and team changes show
+a message and are not persisted. For development, use `pnpm dev`.
+
+To enable real integrations, set `MOCK_MODE=false` and configure the variables
+in `.env.example`, then follow the database setup below. Rebuild after changing modes.
+
 # Next.js SaaS Starter
 
 This is a starter template for building a SaaS application using **Next.js** with support for authentication, Stripe integration for payments, and a dashboard for logged-in users.

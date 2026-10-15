@@ -1,3 +1,4 @@
+import { isMockMode } from '@/lib/mock';
 import Stripe from 'stripe';
 import { redirect } from 'next/navigation';
 import { Team } from '@/lib/db/schema';
@@ -7,7 +8,7 @@ import {
   updateTeamSubscription
 } from '@/lib/db/queries';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || (isMockMode ? 'sk_test_mock' : ''), {
   apiVersion: '2025-04-30.basil'
 });
 
@@ -18,6 +19,7 @@ export async function createCheckoutSession({
   team: Team | null;
   priceId: string;
 }) {
+  if (isMockMode) redirect('/dashboard');
   const user = await getUser();
 
   if (!team || !user) {
@@ -47,6 +49,7 @@ export async function createCheckoutSession({
 }
 
 export async function createCustomerPortalSession(team: Team) {
+  if (isMockMode) return { url: '/pricing' };
   if (!team.stripeCustomerId || !team.stripeProductId) {
     redirect('/pricing');
   }
@@ -147,6 +150,10 @@ export async function handleSubscriptionChange(
 }
 
 export async function getStripePrices() {
+  if (isMockMode) return [
+    { id: 'price_mock_base', productId: 'prod_mock_base', unitAmount: 800, currency: 'usd', interval: 'month', trialPeriodDays: 7 },
+    { id: 'price_mock_plus', productId: 'prod_mock_plus', unitAmount: 1200, currency: 'usd', interval: 'month', trialPeriodDays: 7 }
+  ];
   const prices = await stripe.prices.list({
     expand: ['data.product'],
     active: true,
@@ -165,6 +172,10 @@ export async function getStripePrices() {
 }
 
 export async function getStripeProducts() {
+  if (isMockMode) return [
+    { id: 'prod_mock_base', name: 'Base', description: 'Demo Base plan', defaultPriceId: 'price_mock_base' },
+    { id: 'prod_mock_plus', name: 'Plus', description: 'Demo Plus plan', defaultPriceId: 'price_mock_plus' }
+  ];
   const products = await stripe.products.list({
     active: true,
     expand: ['data.default_price']
